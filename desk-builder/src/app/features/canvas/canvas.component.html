@@ -1,0 +1,104 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-800">3. Interactive Layout Canvas</h2>
+    
+    <!-- Open / Close Toggle -->
+    <button (click)="deskConfig.toggleDeskState()"
+            class="px-5 py-2 font-bold rounded shadow-md transition-colors"
+            [ngClass]="(deskConfig.state$ | async)?.isDeskOpen ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-green-100 text-green-700 hover:bg-green-200'">
+      {{ (deskConfig.state$ | async)?.isDeskOpen ? 'Close Desk' : 'Open Desk' }}
+    </button>
+  </div>
+  
+  <div class="flex items-center space-x-4 mb-6" *ngIf="(deskConfig.state$ | async)?.isDeskOpen">
+    <!-- Custom Length Input -->
+    <div class="flex items-center bg-gray-100 px-3 py-1 rounded shadow-inner">
+      <label class="text-sm text-gray-600 font-medium mr-2">Length (mm):</label>
+      <input type="number" [(ngModel)]="customLength" class="w-20 p-1 border rounded text-sm">
+    </div>
+
+    <div class="flex space-x-2">
+      <button *ngFor="let comp of availableComponents" 
+              (click)="addComponent(comp)"
+              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm shadow transition-transform active:scale-95">
+        + Add {{comp.name}}
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center justify-center relative overflow-auto pb-12 pt-4 w-full h-[800px] brick-wall rounded-lg shadow-inner">
+    <!-- Main Wall Cabinet Area -->
+    <div class="relative cabinet-frame transition-all duration-500 shrink-0 origin-center" 
+         [ngStyle]="{
+           'width.px': ((deskConfig.state$ | async)?.dimensions?.width || 1200) * 0.75,
+           'height.px': ((deskConfig.state$ | async)?.dimensions?.height || 800) * 0.75
+         }"
+         [ngClass]="'texture-' + (deskConfig.state$ | async)?.cabinetMaterial?.id"
+         id="desk-boundary">
+      
+      <!-- Open State: Show items -->
+      <ng-container *ngIf="(deskConfig.state$ | async)?.isDeskOpen">
+        <!-- Drag Items -->
+        <div *ngFor="let item of (deskConfig.state$ | async)?.items"
+             cdkDrag
+             [cdkDragFreeDragPosition]="{x: item.x, y: item.y}"
+             (cdkDragEnded)="onDragEnded($event, item)"
+             cdkDragBoundary="#desk-boundary"
+             class="absolute cursor-move z-20 flex flex-col items-center"
+             [ngStyle]="{
+               'width.px': item.width,
+               'height.px': item.height
+             }"
+             [ngClass]="{
+               'comp-monitor': item.type === 'monitor',
+               'comp-shelf w-72 h-4': item.type === 'shelf' && !item.width,
+               'comp-shelf-v w-4 h-72': item.type === 'shelf-v' && !item.height,
+               'comp-led w-40 h-2': item.type === 'accessory' && !item.width,
+               'comp-led-v w-2 h-40': item.type === 'accessory-v' && !item.height,
+               'comp-shelf': item.type === 'shelf' && item.width,
+               'comp-shelf-v w-4': item.type === 'shelf-v' && item.height,
+               'comp-led h-2': item.type === 'accessory' && item.width,
+               'comp-led-v w-2': item.type === 'accessory-v' && item.height
+             }">
+          
+          <!-- Screen Glow for monitor -->
+          <div *ngIf="item.type === 'monitor'" class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-500 text-xs font-mono shadow-[inset_0_0_15px_rgba(255,255,255,0.1)]">
+            {{item.name}}
+          </div>
+          <!-- Monitor Stand -->
+          <div *ngIf="item.type === 'monitor'" class="monitor-stand"></div>
+
+          <!-- Labels for shelves / LEDs -->
+          <span *ngIf="item.type !== 'monitor' && item.type !== 'shelf-v' && item.type !== 'accessory-v'" class="absolute -top-5 text-[10px] text-white bg-black/50 px-1 rounded whitespace-nowrap">{{item.name}}</span>
+
+          <button (click)="removeItem(item.id)" class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-700 z-50 font-bold border-2 border-white">×</button>
+        </div>
+
+        <!-- Gas Struts -->
+        <div class="gas-strut gas-strut-left"></div>
+        <div class="gas-strut gas-strut-right"></div>
+      </ng-container>
+
+      <!-- Closed State: Show solid panel covering everything -->
+      <div *ngIf="!(deskConfig.state$ | async)?.isDeskOpen"
+           class="absolute inset-0 z-30 transition-all duration-700 opacity-100"
+           [ngClass]="'texture-' + (deskConfig.state$ | async)?.panelMaterial?.id">
+          <div class="w-full h-full flex items-center justify-center text-white/40 uppercase tracking-[0.2em] font-bold text-2xl shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+            KaamKala
+          </div>
+      </div>
+      
+    </div>
+    
+    <!-- Folded down desk surface (Only visible when Open) -->
+    <div *ngIf="(deskConfig.state$ | async)?.isDeskOpen"
+         class="desk-surface transition-all duration-700"
+         [ngClass]="'texture-' + (deskConfig.state$ | async)?.panelMaterial?.id">
+    </div>
+  </div>
+  
+  <div class="mt-20 p-4 bg-orange-100 text-orange-800 rounded-lg border border-orange-200 flex items-center shadow-inner" *ngIf="(deskConfig.state$ | async)?.isDeskOpen && (deskConfig.totalWeight$ | async)! > 20">
+    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    <strong>Warning:</strong> Total internal weight exceeds 20kg. Heavy-duty gas struts will be required for the fold-down mechanism.
+  </div>
+</div>

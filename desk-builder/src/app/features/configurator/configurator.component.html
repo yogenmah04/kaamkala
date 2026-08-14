@@ -1,0 +1,128 @@
+<div class="bg-white p-6 rounded-lg shadow-md mb-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-800">1. Master Dimensions</h2>
+    
+    <div class="flex items-center space-x-2">
+      <label class="text-sm text-gray-600 font-medium">Unit:</label>
+      <select [ngModel]="selectedUnit" (ngModelChange)="onUnitChange($event)" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-1 border bg-gray-50">
+        <option *ngFor="let u of units" [value]="u">{{u | uppercase}}</option>
+      </select>
+    </div>
+  </div>
+  
+  <form [formGroup]="configForm" class="space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Width ({{selectedUnit}})</label>
+        <input type="number" formControlName="width" step="0.01"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+        <p *ngIf="configForm.get('width')?.errors?.['min'] || configForm.get('width')?.errors?.['max']" class="text-red-500 text-xs mt-1">Width must be between {{currentLimits.width.min | number:'1.0-2'}} and {{currentLimits.width.max | number:'1.0-2'}} {{selectedUnit}}.</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Height ({{selectedUnit}})</label>
+        <input type="number" formControlName="height" step="0.01"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+        <p *ngIf="configForm.get('height')?.errors?.['min'] || configForm.get('height')?.errors?.['max']" class="text-red-500 text-xs mt-1">Height must be between {{currentLimits.height.min | number:'1.0-2'}} and {{currentLimits.height.max | number:'1.0-2'}} {{selectedUnit}}.</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Depth ({{selectedUnit}})</label>
+        <input type="number" formControlName="depth" step="0.01"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+        <p *ngIf="configForm.get('depth')?.errors?.['min'] || configForm.get('depth')?.errors?.['max']" class="text-red-500 text-xs mt-1">Depth must be between {{currentLimits.depth.min | number:'1.0-2'}} and {{currentLimits.depth.max | number:'1.0-2'}} {{selectedUnit}}.</p>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mt-6 mb-4 text-gray-800">2. Materials & Colors</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Outer Wall Cabinet Frame</label>
+        <div class="flex items-center space-x-2 mt-1">
+          <input type="color" [ngModel]="(deskConfig.state$ | async)?.cabinetColorHex" (ngModelChange)="deskConfig.updateCabinetColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-12 cursor-pointer rounded border border-gray-300">
+          <select formControlName="cabinetMaterialId" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+            <option *ngFor="let material of materials" [value]="material.id">{{material.name}} (+${{material.pricePerSqM}}/sqm)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Folding Desk Panel</label>
+        <div class="flex items-center space-x-2 mt-1">
+          <input type="color" [ngModel]="(deskConfig.state$ | async)?.panelColorHex" (ngModelChange)="deskConfig.updatePanelColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-12 cursor-pointer rounded border border-gray-300">
+          <select formControlName="panelMaterialId" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+            <option *ngFor="let material of materials" [value]="material.id">{{material.name}} (+${{material.pricePerSqM}}/sqm)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800">3. Internal Components</h2>
+  
+  <!-- 3.1 Monitors -->
+  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+    <h3 class="text-md font-medium text-gray-700 mb-3">3.1 Monitors</h3>
+    <div class="flex flex-wrap gap-2">
+      <button *ngFor="let comp of monitorComponents" 
+              (click)="addComponent(comp)"
+              class="px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 text-sm shadow transition-transform active:scale-95">
+        + Add {{comp.name}}
+      </button>
+    </div>
+  </div>
+
+  <!-- 3.2 Layout Partitions & Materials -->
+  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+    <h3 class="text-md font-medium text-gray-700 mb-3">3.2 Layout Partitions (Custom Dimensions)</h3>
+    
+    <div *ngFor="let comp of partitionComponents" class="bg-white p-3 border border-gray-200 rounded mb-3 shadow-sm">
+      <div class="flex justify-between items-center mb-2">
+        <span class="font-medium text-gray-800 text-sm">{{comp.name}}</span>
+        <button (click)="addComponent(comp)" class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs shadow">
+          + Add
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="block text-xs text-gray-600">Length (L) mm:</label>
+          <input type="number" [(ngModel)]="comp.l" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600">Height (H) mm:</label>
+          <input type="number" [(ngModel)]="comp.h" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-600">Breadth (B) mm:</label>
+          <input type="number" [(ngModel)]="comp.b" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+        </div>
+      </div>
+    </div>
+    
+    <p class="text-xs text-gray-500 mt-2 italic">* Custom partitions are generated as 3D blocks (L x H x B) inside the cabinet.</p>
+  </div>
+
+  <!-- 3.3 Added Components List -->
+  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4" *ngIf="(deskConfig.state$ | async)?.items?.length">
+    <h3 class="text-md font-medium text-gray-700 mb-3">3.3 Added Components</h3>
+    <ul class="space-y-2">
+      <li *ngFor="let item of (deskConfig.state$ | async)?.items" class="flex justify-between items-center bg-white p-2 border border-gray-300 rounded shadow-sm text-sm">
+        <span class="font-medium text-gray-800">{{item.name}}</span>
+        <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors">
+          Remove
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 4. Export Section -->
+  <div class="mt-8 pt-6 border-t border-gray-200">
+    <button (click)="exportToPdf()" class="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-lg shadow-md text-lg font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Export Manufacturing PDF
+    </button>
+    <p class="text-xs text-gray-500 mt-3 text-center">Generates a blueprint with a 3D snapshot and complete cut list.</p>
+  </div>
+</div>

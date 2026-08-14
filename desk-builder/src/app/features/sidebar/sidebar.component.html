@@ -1,0 +1,48 @@
+<div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
+  <h2 class="text-xl font-semibold mb-6 text-gray-800 border-b pb-2">Order Summary</h2>
+  
+  <div class="space-y-4 flex-grow">
+    <div>
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Dimensions</h3>
+      <p class="text-gray-900">{{(deskConfig.state$ | async)?.dimensions?.width}} x {{(deskConfig.state$ | async)?.dimensions?.height}} x {{(deskConfig.state$ | async)?.dimensions?.depth}} mm</p>
+    </div>
+    
+    <div class="flex justify-between">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Cabinet Frame</h3>
+        <p class="text-gray-900">{{(deskConfig.state$ | async)?.cabinetMaterial?.name}}</p>
+      </div>
+      <div class="text-right">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Folding Panel</h3>
+        <p class="text-gray-900">{{(deskConfig.state$ | async)?.panelMaterial?.name}}</p>
+      </div>
+    </div>
+    
+    <div>
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Internal Components</h3>
+      <ul class="list-disc list-inside text-gray-900">
+        <li *ngFor="let item of (deskConfig.state$ | async)?.items">
+          {{item.name}}
+        </li>
+      </ul>
+      <p *ngIf="(deskConfig.state$ | async)?.items?.length === 0" class="text-sm text-gray-500 italic">No components added yet.</p>
+    </div>
+    
+    <div class="pt-4 border-t border-gray-200">
+      <div class="flex justify-between items-center text-sm mb-2">
+        <span class="text-gray-600">Total Weight Estimate</span>
+        <span class="font-medium text-gray-900">{{deskConfig.totalWeight$ | async}} kg</span>
+      </div>
+      <div class="flex justify-between items-center text-xl font-bold text-gray-900">
+        <span>Total Price</span>
+        <span>${{deskConfig.totalPrice$ | async | number:'1.2-2'}}</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-6 pt-4 border-t border-gray-200">
+    <button (click)="saveDesign()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition duration-150 ease-in-out">
+      Save Design / Export JSON
+    </button>
+  </div>
+</div>
