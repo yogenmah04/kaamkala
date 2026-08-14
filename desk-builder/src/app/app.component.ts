@@ -13,4 +13,9 @@ import { SidebarComponent } from './features/sidebar/sidebar.component';
 })
 export class AppComponent {
   title = 'desk-builder';
+  activeMobileTab: 'config' | 'preview' = 'config';
+
+  setMobileTab(tab: 'config' | 'preview') {
+    this.activeMobileTab = tab;
+  }
 }
