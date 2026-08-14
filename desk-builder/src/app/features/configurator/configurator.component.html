@@ -34,25 +34,19 @@
       </div>
     </div>
 
-    <h2 class="text-xl font-semibold mt-6 mb-4 text-gray-800">2. Materials & Colors</h2>
+    <h2 class="text-xl font-semibold mt-6 mb-4 text-gray-800">2. Colors</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Outer Wall Cabinet Frame</label>
         <div class="flex items-center space-x-2 mt-1">
-          <input type="color" [ngModel]="(deskConfig.state$ | async)?.cabinetColorHex" (ngModelChange)="deskConfig.updateCabinetColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-12 cursor-pointer rounded border border-gray-300">
-          <select formControlName="cabinetMaterialId" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-            <option *ngFor="let material of materials" [value]="material.id">{{material.name}} (+${{material.pricePerSqM}}/sqm)</option>
-          </select>
+          <input type="color" [ngModel]="(deskConfig.state$ | async)?.cabinetColorHex" (ngModelChange)="deskConfig.updateCabinetColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-full max-w-xs cursor-pointer rounded border border-gray-300">
         </div>
       </div>
       
       <div>
         <label class="block text-sm font-medium text-gray-700">Folding Desk Panel</label>
         <div class="flex items-center space-x-2 mt-1">
-          <input type="color" [ngModel]="(deskConfig.state$ | async)?.panelColorHex" (ngModelChange)="deskConfig.updatePanelColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-12 cursor-pointer rounded border border-gray-300">
-          <select formControlName="panelMaterialId" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-            <option *ngFor="let material of materials" [value]="material.id">{{material.name}} (+${{material.pricePerSqM}}/sqm)</option>
-          </select>
+          <input type="color" [ngModel]="(deskConfig.state$ | async)?.panelColorHex" (ngModelChange)="deskConfig.updatePanelColor($event)" [ngModelOptions]="{standalone: true}" class="h-9 w-full max-w-xs cursor-pointer rounded border border-gray-300">
         </div>
       </div>
     </div>
