@@ -24,6 +24,7 @@ export interface CanvasItem {
   width?: number; // Optional custom width for rendering (px)
   height?: number; // Optional custom height for rendering (px)
   itemDepth?: number; // Optional custom depth/breadth for 3D rendering (px)
+  colorHex?: string; // Optional custom color to contrast with background
 }
 
 export interface DeskConfigState {
@@ -108,6 +109,10 @@ export class DeskConfigService {
   removeItem(id: string) {
     const items = this.stateSubject.value.items.filter(item => item.id !== id);
     this.stateSubject.next({ ...this.stateSubject.value, items });
+  }
+
+  loadTheme(statePatch: Partial<DeskConfigState>) {
+    this.stateSubject.next({ ...this.stateSubject.value, ...statePatch });
   }
 
   calculateTotalWeight(): number {

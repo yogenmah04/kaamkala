@@ -46,8 +46,9 @@
              cdkDragBoundary="#desk-boundary"
              class="absolute cursor-move z-20 flex flex-col items-center"
              [ngStyle]="{
-               'width.px': item.width,
-               'height.px': item.height
+               'width.px': item.type === 'hardware' ? 20 : item.width,
+               'height.px': item.type === 'hardware' ? item.height : item.height,
+               'background-color': item.type === 'hardware' ? 'transparent' : (item.colorHex || null)
              }"
              [ngClass]="{
                'comp-monitor': item.type === 'monitor',
@@ -60,6 +61,18 @@
                'comp-led h-2': item.type === 'accessory' && item.width,
                'comp-led-v w-2': item.type === 'accessory-v' && item.height
              }">
+          
+          <!-- Strut / Forcefield visuals (Child) -->
+          <div *ngIf="item.type === 'hardware'" 
+               class="forcefield-beam"
+               [ngStyle]="{
+                  'height.px': 350,
+                  'top.px': 20,
+                  'background-color': item.colorHex || 'rgba(0,255,255,0.5)',
+                  'transform': (item.x < 400) ? 'rotate(25deg) translateZ(30px)' : 'rotate(-25deg) translateZ(30px)',
+                  'transform-origin': 'top center'
+               }">
+          </div>
           
           <!-- Screen Glow for monitor -->
           <div *ngIf="item.type === 'monitor'" class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-500 text-xs font-mono shadow-[inset_0_0_15px_rgba(255,255,255,0.1)]">
@@ -74,9 +87,7 @@
           <button (click)="removeItem(item.id)" class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-700 z-50 font-bold border-2 border-white">×</button>
         </div>
 
-        <!-- Gas Struts -->
-        <div class="gas-strut gas-strut-left"></div>
-        <div class="gas-strut gas-strut-right"></div>
+        <!-- Removed hardcoded gas struts; now dynamically rendered -->
       </ng-container>
 
       <!-- Closed State: Show solid panel covering everything -->
