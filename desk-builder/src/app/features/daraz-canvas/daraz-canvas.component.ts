@@ -79,8 +79,14 @@ export class DarazCanvasComponent {
     this.showMeasurements = !this.showMeasurements;
   }
 
-  toInches(mm: number): string {
-    return (mm / 25.4).toFixed(1) + '"';
+  formatMeasurement(mm: number, unit: string): string {
+    switch (unit) {
+      case 'cm': return (mm / 10).toFixed(1) + ' cm';
+      case 'm': return (mm / 1000).toFixed(2) + ' m';
+      case 'in': return (mm / 25.4).toFixed(1) + '"';
+      case 'ft': return (mm / 304.8).toFixed(2) + ' ft';
+      default: return Math.round(mm) + ' mm';
+    }
   }
 
   onDragEnded(event: CdkDragEnd, item: DarazItem) {
@@ -104,5 +110,22 @@ export class DarazCanvasComponent {
 
   removeItem(id: string) {
     this.darazConfig.removeItem(id);
+  }
+
+  getUIZTranslate(item: any, state: any, zOffset: number): string {
+    const realDepthMm = item.itemDepth || state.dimensions.width || 600;
+    
+    // Default front face is at depth * 0.25
+    let baseZ = realDepthMm * 0.25; 
+
+    // Hanger rods are positioned exactly in the middle of the wardrobe (depth * 0.125)
+    if (item.type === 'hanger-rod') {
+      baseZ = realDepthMm * 0.125;
+    }
+
+    // Drawers no longer auto-slide out when doors are open to preserve layout visualization
+    let slideOffset = 0;
+
+    return `translateZ(${baseZ + slideOffset + zOffset}px)`;
   }
 }

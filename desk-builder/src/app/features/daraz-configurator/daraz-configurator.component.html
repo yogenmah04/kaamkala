@@ -98,16 +98,16 @@
         </div>
         <div class="grid grid-cols-3 gap-2" *ngIf="item.type !== 'human'">
           <div>
-            <label class="block text-[10px] text-gray-500 font-bold">Length (L) mm:</label>
-            <input type="number" [ngModel]="item.width" (ngModelChange)="updateItemSize(item, $event, item.height || 0, item.itemDepth)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+            <label class="block text-[10px] text-gray-500 font-bold">Length (L) {{selectedUnit}}:</label>
+            <input type="number" [ngModel]="getDisplayValue(item.width || 0)" (ngModelChange)="onItemSizeChange(item, 'width', $event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
           </div>
           <div>
-            <label class="block text-[10px] text-gray-500 font-bold">Breadth (B) mm:</label>
-            <input type="number" [ngModel]="item.height" (ngModelChange)="updateItemSize(item, item.width || 0, $event, item.itemDepth)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+            <label class="block text-[10px] text-gray-500 font-bold">Breadth (B) {{selectedUnit}}:</label>
+            <input type="number" [ngModel]="getDisplayValue(item.height || 0)" (ngModelChange)="onItemSizeChange(item, 'height', $event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
           </div>
           <div>
-            <label class="block text-[10px] text-gray-500 font-bold">Depth (D) mm:</label>
-            <input type="number" [ngModel]="item.itemDepth || (darazConfig.state$ | async)?.dimensions?.width" (ngModelChange)="updateItemSize(item, item.width || 0, item.height || 0, $event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+            <label class="block text-[10px] text-gray-500 font-bold">Depth (D) {{selectedUnit}}:</label>
+            <input type="number" [ngModel]="getDisplayValue(item.itemDepth || (darazConfig.state$ | async)?.dimensions?.width || 600)" (ngModelChange)="onItemSizeChange(item, 'itemDepth', $event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
           </div>
         </div>
       </li>

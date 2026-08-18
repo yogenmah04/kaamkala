@@ -34,8 +34,10 @@ export class DarazConfiguratorComponent implements OnDestroy {
     { type: 'human', name: 'Human Silhouette', price: 0, weight: 75, realWidth: 600, realHeight: 1800, colorHex: 'rgba(0, 0, 0, 0.15)' },
     { type: 'hanger-rod', name: 'Hanger Rod', price: 20, weight: 1, realWidth: 1000, realHeight: 20, colorHex: '#aaaaaa' },
     { type: 'shelf', name: 'Horizontal Shelf', price: 40, weight: 5, realWidth: 1000, realHeight: 20, colorHex: '#d2b48c' },
+    { type: 'shelf', name: 'Side Stack Shelf', price: 30, weight: 4, realWidth: 450, realHeight: 20, colorHex: '#f5f5dc' },
     { type: 'vertical-divider', name: 'Vertical Divider', price: 40, weight: 5, realWidth: 20, realHeight: 1000, colorHex: '#d2b48c' },
-    { type: 'drawer', name: 'Storage Drawer', price: 150, weight: 12, realWidth: 900, realHeight: 300, colorHex: '#ffffff' }
+    { type: 'drawer', name: 'Storage Drawer', price: 150, weight: 12, realWidth: 900, realHeight: 300, colorHex: '#ffffff' },
+    { type: 'drawer', name: 'Pull-Out Drawer Unit', price: 80, weight: 10, realWidth: 450, realHeight: 200, colorHex: '#ffffff' }
   ];
 
   constructor(
@@ -63,6 +65,7 @@ export class DarazConfiguratorComponent implements OnDestroy {
   onUnitChange(newUnit: string) {
     const oldUnit = this.selectedUnit;
     this.selectedUnit = newUnit;
+    this.darazConfig.updateUnit(newUnit);
 
     const currentValues = this.configForm.value;
     const newLength = this.convertBetween(currentValues.length, oldUnit, newUnit);
@@ -129,6 +132,13 @@ export class DarazConfiguratorComponent implements OnDestroy {
       initialWidth = maxWidth - 100; // 100mm padding
     }
 
+    let defaultDepth = currentState.dimensions.width;
+    if (comp.type === 'drawer') {
+      defaultDepth = defaultDepth > 100 ? defaultDepth - 100 : defaultDepth; // Recess drawers by 100mm
+    } else if (comp.type === 'shelf') {
+      defaultDepth = defaultDepth > 50 ? defaultDepth - 50 : defaultDepth; // Recess shelves by 50mm
+    }
+
     this.darazConfig.addItem({
       type: comp.type,
       name: comp.name,
@@ -136,7 +146,7 @@ export class DarazConfiguratorComponent implements OnDestroy {
       weight: comp.weight,
       width: initialWidth,
       height: comp.realHeight,
-      itemDepth: currentState.dimensions.width, // default to full depth
+      itemDepth: defaultDepth,
       x: 20 + Math.random() * 30, // spawn slightly offset
       y: 20 + Math.random() * 30,
       colorHex: comp.colorHex
@@ -145,6 +155,23 @@ export class DarazConfiguratorComponent implements OnDestroy {
 
   updateItemSize(item: any, width: number, height: number, depth?: number) {
     this.darazConfig.updateItemDimensions(item.id, width, height, depth);
+  }
+
+  getDisplayValue(mm: number): number {
+    return Number(this.convertBetween(mm, 'mm', this.selectedUnit).toFixed(2));
+  }
+
+  onItemSizeChange(item: any, field: 'width' | 'height' | 'itemDepth', displayVal: number) {
+    const mmVal = this.convertToMm(displayVal, this.selectedUnit);
+    let newWidth = item.width || 0;
+    let newHeight = item.height || 0;
+    let newDepth = item.itemDepth;
+
+    if (field === 'width') newWidth = mmVal;
+    if (field === 'height') newHeight = mmVal;
+    if (field === 'itemDepth') newDepth = mmVal;
+
+    this.darazConfig.updateItemDimensions(item.id, newWidth, newHeight, newDepth);
   }
 
   removeItem(id: string) {

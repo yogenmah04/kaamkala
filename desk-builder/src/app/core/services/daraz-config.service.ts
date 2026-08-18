@@ -36,6 +36,7 @@ export interface DarazConfigState {
   isDoorOpen: boolean;
   doorStyle: 'hinged' | '3-door' | 'sliding' | 'folding' | 'pivot' | 'push-to-open' | 'lift-up' | 'drop-down' | 'open';
   items: DarazItem[];
+  selectedUnit: string;
 }
 
 export const DARAZ_MATERIALS: MaterialOption[] = [
@@ -58,9 +59,9 @@ export const DARAZ_THEMES = [
     outerDoorMaterial: DARAZ_MATERIALS.find(m => m.id === 'white'),
     doorStyle: 'hinged' as const,
     items: [
-      { type: 'hanger-rod', name: 'Main Hanger Rod', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 50, y: 150, colorHex: '#aaaaaa' },
-      { type: 'shelf', name: 'Top Shelf', price: 40, weight: 5, realWidth: 1100, realHeight: 20, x: 50, y: 100, colorHex: '#d2b48c' },
-      { type: 'drawer', name: 'Bottom Storage Drawer', price: 100, weight: 8, realWidth: 1100, realHeight: 300, x: 50, y: 1600, colorHex: '#d2b48c' }
+      { type: 'hanger-rod', name: 'Main Hanger Rod', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 12.5, y: 37.5, colorHex: '#aaaaaa' },
+      { type: 'shelf', name: 'Top Shelf', price: 40, weight: 5, realWidth: 1100, realHeight: 20, x: 12.5, y: 25, itemDepth: 550, colorHex: '#d2b48c' },
+      { type: 'drawer', name: 'Bottom Storage Drawer', price: 100, weight: 8, realWidth: 1100, realHeight: 300, x: 12.5, y: 400, itemDepth: 500, colorHex: '#d2b48c' }
     ]
   },
   {
@@ -73,11 +74,42 @@ export const DARAZ_THEMES = [
     outerDoorMaterial: DARAZ_MATERIALS.find(m => m.id === 'matte-black'),
     doorStyle: 'open' as const,
     items: [
-      { type: 'vertical-divider', name: 'Center Divider', price: 60, weight: 15, realWidth: 20, realHeight: 2300, x: 1190, y: 50, colorHex: '#5b4033' },
-      { type: 'hanger-rod', name: 'Left Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 50, y: 200, colorHex: '#aaaaaa' },
-      { type: 'hanger-rod', name: 'Right Top Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 1250, y: 200, colorHex: '#aaaaaa' },
-      { type: 'hanger-rod', name: 'Right Bottom Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 1250, y: 1200, colorHex: '#aaaaaa' },
-      { type: 'drawer', name: 'Left Drawer Set', price: 250, weight: 20, realWidth: 1100, realHeight: 600, x: 50, y: 1700, colorHex: '#5b4033' }
+      { type: 'vertical-divider', name: 'Center Divider', price: 60, weight: 15, realWidth: 20, realHeight: 2300, x: 297.5, y: 12.5, colorHex: '#5b4033' },
+      { type: 'hanger-rod', name: 'Left Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 12.5, y: 50, colorHex: '#aaaaaa' },
+      { type: 'hanger-rod', name: 'Right Top Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 312.5, y: 50, colorHex: '#aaaaaa' },
+      { type: 'hanger-rod', name: 'Right Bottom Hanger', price: 20, weight: 1, realWidth: 1100, realHeight: 20, x: 312.5, y: 300, colorHex: '#aaaaaa' },
+      { type: 'drawer', name: 'Left Drawer Set', price: 250, weight: 20, realWidth: 1100, realHeight: 600, x: 12.5, y: 425, itemDepth: 500, colorHex: '#5b4033' }
+    ]
+  },
+  {
+    name: 'Ultimate Organizer 3-Zone',
+    description: 'A comprehensive layout featuring a top loft for long-term storage, central hanging space, side shelves, and base drawers.',
+    dimensions: { length: 1800, width: 600, height: 2400 },
+    innerColorHex: '#f5f5dc',
+    outerDoorColorHex: '#8b4513',
+    innerMaterial: DARAZ_MATERIALS.find(m => m.id === 'white'),
+    outerDoorMaterial: DARAZ_MATERIALS.find(m => m.id === 'walnut'),
+    doorStyle: '3-door' as const,
+    items: [
+      // 1. Top Section (Long-Term & Seasonal Storage)
+      { type: 'shelf', name: 'High-Level Loft Compartment', price: 60, weight: 8, realWidth: 1700, realHeight: 20, x: 12.5, y: 100, colorHex: '#f5f5dc' },
+      
+      // Vertical Divider splitting Middle and Lower sections - Now touches the floor
+      { type: 'vertical-divider', name: 'Main Partition', price: 50, weight: 12, realWidth: 20, realHeight: 1980, x: 287.5, y: 105, colorHex: '#f5f5dc' },
+      
+      // 2. Middle Section (Primary Hanging & Daily Wear)
+      { type: 'hanger-rod', name: 'Garment Hanging Zone', price: 30, weight: 2, realWidth: 1050, realHeight: 20, x: 12.5, y: 137.5, colorHex: '#aaaaaa' },
+      
+      // Side Stack Shelves (Right Side) - Evenly distributed
+      { type: 'shelf', name: 'Side Stack Shelf 1', price: 30, weight: 4, realWidth: 550, realHeight: 20, x: 300, y: 235, colorHex: '#f5f5dc' },
+      { type: 'shelf', name: 'Side Stack Shelf 2', price: 30, weight: 4, realWidth: 550, realHeight: 20, x: 300, y: 365, colorHex: '#f5f5dc' },
+      { type: 'shelf', name: 'Drawer Top Cover', price: 30, weight: 4, realWidth: 550, realHeight: 20, x: 300, y: 495, colorHex: '#f5f5dc' },
+      
+      // 3. Lower Section (Drawers & Utility Compartments) - Stacked flush to the floor
+      { type: 'drawer', name: 'Pull-Out Drawer Unit 1', price: 80, weight: 10, realWidth: 550, realHeight: 200, x: 300, y: 500, itemDepth: 500, colorHex: '#ffffff' },
+      { type: 'drawer', name: 'Pull-Out Drawer Unit 2', price: 80, weight: 10, realWidth: 550, realHeight: 200, x: 300, y: 550, itemDepth: 500, colorHex: '#ffffff' },
+      
+      { type: 'shelf', name: 'Base Shoes / Bulk Storage', price: 40, weight: 5, realWidth: 1050, realHeight: 20, x: 12.5, y: 575, itemDepth: 550, colorHex: '#f5f5dc' }
     ]
   }
 ];
@@ -94,7 +126,8 @@ export class DarazConfigService {
     outerDoorColorHex: DARAZ_THEMES[0].outerDoorColorHex,
     isDoorOpen: true, // Default to open so user can edit inside
     doorStyle: 'hinged',
-    items: DARAZ_THEMES[0].items.map(item => ({...item, id: Math.random().toString(36).substring(2, 9)})) as DarazItem[]
+    items: DARAZ_THEMES[0].items.map(item => ({...item, id: Math.random().toString(36).substring(2, 9)})) as DarazItem[],
+    selectedUnit: 'mm'
   };
 
   private stateSubject = new BehaviorSubject<DarazConfigState>(this.initialState);
@@ -135,6 +168,10 @@ export class DarazConfigService {
 
   toggleDoorState() {
     this.stateSubject.next({ ...this.stateSubject.value, isDoorOpen: !this.stateSubject.value.isDoorOpen });
+  }
+
+  updateUnit(unit: string) {
+    this.stateSubject.next({ ...this.stateSubject.value, selectedUnit: unit });
   }
 
   addItem(item: Omit<DarazItem, 'id'>) {
