@@ -1,0 +1,369 @@
+<div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col min-h-[700px]">
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+    <h2 class="text-xl font-semibold text-gray-800">4. Interactive 3D Wardrobe</h2>
+    <div class="flex items-center gap-3">
+      
+      <div class="flex items-center bg-gray-100 rounded shadow-sm border border-gray-200">
+        <button (click)="zoomOut()" class="px-3 py-1.5 text-gray-700 hover:bg-gray-200 font-bold transition-colors border-r border-gray-200">-</button>
+        <span class="px-3 py-1.5 text-sm font-mono text-gray-600 font-medium">{{ (zoomScale * 100) | number:'1.0-0' }}%</span>
+        <button (click)="zoomIn()" class="px-3 py-1.5 text-gray-700 hover:bg-gray-200 font-bold transition-colors border-l border-gray-200">+</button>
+      </div>
+
+      <button (click)="darazConfig.toggleDoorState()" 
+              [ngClass]="(darazConfig.state$ | async)?.isDoorOpen ? 'bg-amber-500 hover:bg-amber-600' : 'bg-gray-700 hover:bg-gray-800'"
+              class="px-3 py-1.5 text-white text-sm font-bold rounded shadow transition-colors active:scale-95">
+        {{ (darazConfig.state$ | async)?.isDoorOpen ? 'Close Doors' : 'Open Doors' }}
+      </button>
+
+      <button (click)="toggleMeasurements()" 
+              [ngClass]="showMeasurements ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-500 hover:bg-gray-600'"
+              class="px-3 py-1.5 text-white text-sm font-bold rounded shadow transition-colors active:scale-95">
+        {{ showMeasurements ? 'Hide Measurements' : 'Show Measurements' }}
+      </button>
+
+      <button (click)="resetToFront()" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-bold rounded shadow hover:bg-indigo-700 transition-colors active:scale-95">
+        Front 2D Edit Mode
+      </button>
+
+    </div>
+  </div>
+
+  <div class="flex-grow flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border border-gray-300 cursor-grab active:cursor-grabbing select-none" 
+       style="perspective: 2000px;"
+       (mousedown)="startDrag($event)"
+       (wheel)="onWheel($event)">
+    
+    <!-- Flat 3D-Rotated Canvas for Wardrobe (Standing Upright) -->
+    <div *ngIf="(darazConfig.state$ | async) as state" 
+         class="relative origin-center transition-transform duration-75"
+         [style.transform]="'scale(' + zoomScale + ') rotateX(' + rotationX + 'deg) rotateY(' + rotationZ + 'deg)'"
+         [ngStyle]="{
+           'width.px': (state.dimensions.length || 1200) * 0.25,
+           'height.px': (state.dimensions.height || 2000) * 0.25
+         }"
+         style="transform-style: preserve-3d;">
+         
+      <!-- Wardrobe Main Body (Back Panel) -->
+      <div class="w-full h-full relative shadow-[inset_0_0_30px_rgba(0,0,0,0.5)] border-2 border-black/40" 
+           id="daraz-boundary"
+           [style.background-color]="state.innerColorHex"
+           style="transform-style: preserve-3d;">
+
+        <!-- Global Measurements Overlay -->
+        <div *ngIf="showMeasurements" class="absolute inset-0 pointer-events-none z-40">
+          <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[10px] font-mono px-2 py-0.5 rounded backdrop-blur-sm">W: {{toInches(state.dimensions.length)}}</div>
+          <div class="absolute top-1/2 -left-20 -translate-y-1/2 bg-black/70 text-white text-[10px] font-mono px-2 py-0.5 rounded backdrop-blur-sm -rotate-90">H: {{toInches(state.dimensions.height)}}</div>
+        </div>
+        
+        <!-- Wardrobe Left Side Panel (Depth) -->
+        <div class="absolute top-0 left-0 h-full origin-left border border-black/40"
+             [ngStyle]="{
+               'width.px': (state.dimensions.width || 600) * 0.25,
+               'background-color': state.innerColorHex,
+               'transform': 'rotateY(-90deg)',
+               'filter': 'brightness(0.7)'
+             }"></div>
+             
+        <!-- Wardrobe Right Side Panel (Depth) -->
+        <div class="absolute top-0 right-0 h-full origin-right border border-black/40"
+             [ngStyle]="{
+               'width.px': (state.dimensions.width || 600) * 0.25,
+               'background-color': state.innerColorHex,
+               'transform': 'rotateY(90deg)',
+               'filter': 'brightness(0.7)'
+             }"></div>
+
+        <!-- Wardrobe Top Panel (Depth) -->
+        <div class="absolute top-0 left-0 w-full origin-top border border-black/40"
+             [ngStyle]="{
+               'height.px': (state.dimensions.width || 600) * 0.25,
+               'background-color': state.innerColorHex,
+               'transform': 'rotateX(90deg)',
+               'filter': 'brightness(0.8)'
+             }"></div>
+
+        <!-- Wardrobe Bottom Panel (Depth) -->
+        <div class="absolute bottom-0 left-0 w-full origin-bottom border border-black/40"
+             [ngStyle]="{
+               'height.px': (state.dimensions.width || 600) * 0.25,
+               'background-color': state.innerColorHex,
+               'transform': 'rotateX(-90deg)',
+               'filter': 'brightness(0.6)'
+             }"></div>
+
+        <div *ngFor="let item of state.items; trackBy: trackByItem"
+             cdkDrag
+             [cdkDragFreeDragPosition]="{x: item.x, y: item.y}"
+             (cdkDragEnded)="onDragEnded($event, item)"
+             cdkDragBoundary="#daraz-boundary"
+             class="absolute z-20 flex flex-col items-center justify-center group"
+             style="transform-style: preserve-3d;"
+             [ngStyle]="{
+               'width.px': (item.width || 1000) * 0.25,
+               'height.px': (item.height || 20) * 0.25,
+               'max-width.px': ((state.dimensions.length || 1200) * 0.25) - item.x,
+               'max-height.px': ((state.dimensions.height || 2000) * 0.25) - item.y
+             }">
+             
+          <!-- Native Resize Engine (Hidden from 3D, drives state updates) -->
+          <div class="absolute inset-0 z-50 pointer-events-auto" 
+               style="resize: both; overflow: hidden; opacity: 0;"
+               (mouseup)="onItemResize(item, $event)"></div>
+             
+          <!-- 3D Depth Faces for Shelf / Drawer -->
+          <ng-container *ngIf="item.type === 'shelf' || item.type === 'drawer'">
+            <!-- Top Face -->
+            <div class="absolute top-0 left-0 w-full origin-top border border-black/20"
+                 [ngStyle]="{
+                   'height.px': (item.itemDepth || state.dimensions.width || 600) * 0.25,
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'rotateX(90deg)',
+                   'filter': 'brightness(0.9)'
+                 }"></div>
+            <!-- Bottom Face -->
+            <div class="absolute bottom-0 left-0 w-full origin-bottom border border-black/20"
+                 [ngStyle]="{
+                   'height.px': (item.itemDepth || state.dimensions.width || 600) * 0.25,
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'rotateX(-90deg)',
+                   'filter': 'brightness(0.6)'
+                 }"></div>
+            <!-- Front Face -->
+            <div class="absolute top-0 left-0 w-full h-full border border-black/20 flex items-center justify-center"
+                 [ngStyle]="{
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'translateZ(' + ((item.itemDepth || state.dimensions.width || 600) * 0.25) + 'px)'
+                 }">
+               <div *ngIf="item.type === 'drawer'" class="w-1/4 h-2 bg-gray-300 rounded shadow"></div>
+            </div>
+          </ng-container>
+
+          <!-- 3D Depth Faces for Vertical Divider -->
+          <ng-container *ngIf="item.type === 'vertical-divider'">
+            <!-- Left Face -->
+            <div class="absolute top-0 left-0 h-full origin-left border border-black/20"
+                 [ngStyle]="{
+                   'width.px': (item.itemDepth || state.dimensions.width || 600) * 0.25,
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'rotateY(-90deg)',
+                   'filter': 'brightness(0.7)'
+                 }"></div>
+            <!-- Right Face -->
+            <div class="absolute top-0 right-0 h-full origin-right border border-black/20"
+                 [ngStyle]="{
+                   'width.px': (item.itemDepth || state.dimensions.width || 600) * 0.25,
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'rotateY(90deg)',
+                   'filter': 'brightness(0.7)'
+                 }"></div>
+            <!-- Front Face -->
+            <div class="absolute top-0 left-0 w-full h-full border border-black/20"
+                 [ngStyle]="{
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'translateZ(' + ((item.itemDepth || state.dimensions.width || 600) * 0.25) + 'px)'
+                 }"></div>
+          </ng-container>
+
+          <!-- 3D Depth for Hanger Rod -->
+          <ng-container *ngIf="item.type === 'hanger-rod'">
+            <!-- Push the rod halfway forward based on its custom depth or wardrobe depth -->
+            <div class="absolute top-0 left-0 w-full h-full rounded-full border border-black/40"
+                 [ngStyle]="{
+                   'background-color': item.colorHex || 'rgba(255,255,255,0.8)',
+                   'transform': 'translateZ(' + ((item.itemDepth || state.dimensions.width || 600) * 0.125) + 'px)',
+                   'box-shadow': '0px 10px 15px rgba(0,0,0,0.5)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Drag Handle overlay for dragging (placed on top of the protruding 3D front face) -->
+          <div cdkDragHandle class="absolute inset-0 z-40 cursor-move pointer-events-auto" 
+               [ngStyle]="{'transform': 'translateZ(' + (((item.itemDepth || state.dimensions.width || 600) * 0.25) + 1) + 'px)'}"
+               style="clip-path: polygon(0 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) calc(100% - 25px), calc(100% - 25px) 100%, 0 100%);"></div>
+
+          <!-- Custom Visible Resize Grabber indicator on the front face -->
+          <div class="absolute bottom-0 right-0 w-4 h-4 bg-black/30 pointer-events-none rounded-tl z-40"
+               [ngStyle]="{'transform': 'translateZ(' + (((item.itemDepth || state.dimensions.width || 600) * 0.25) + 2) + 'px)'}">
+            <svg class="w-full h-full text-white/70" fill="currentColor" viewBox="0 0 24 24"><path d="M22 22H10v-2h10v-10h2v12zm-4-4H6V6h12v12zm-2-10H8v8h10V8z"/></svg>
+          </div>
+
+          <!-- Content Wrapper protruding forward for visibility -->
+          <div class="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none"
+               [ngStyle]="{'transform': 'translateZ(' + (((item.itemDepth || state.dimensions.width || 600) * 0.25) + 3) + 'px)'}">
+            <div *ngIf="item.type === 'human'" class="text-4xl mb-1 opacity-80 drop-shadow-lg">🧍</div>
+            <span class="text-[10px] font-bold text-black/70 px-1 text-center drop-shadow-sm">{{item.name}}</span>
+          </div>
+          
+          <div *ngIf="showMeasurements" class="absolute bottom-1 left-1 bg-black/80 text-white text-[8px] font-mono px-1 rounded pointer-events-none z-30"
+               [ngStyle]="{'transform': 'translateZ(' + (((item.itemDepth || state.dimensions.width || 600) * 0.25) + 3) + 'px)'}">
+            L:{{toInches(item.width || 400)}} × B:{{toInches(item.height || 400)}} × D:{{toInches(item.itemDepth || state.dimensions.width || 600)}}
+          </div>
+
+          <button (click)="removeItem(item.id)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow hover:bg-red-600 border border-white z-50 cursor-pointer pointer-events-auto"
+                  [ngStyle]="{'transform': 'translateZ(' + (((item.itemDepth || state.dimensions.width || 600) * 0.25) + 5) + 'px)'}">×</button>
+        </div>
+
+        <!-- Outer Doors Overlay (Mounted on the Front Face) -->
+        <div *ngIf="state.doorStyle !== 'open'" class="absolute inset-0 z-50 pointer-events-none flex"
+             [ngStyle]="{
+               'transform': 'translateZ(' + ((state.dimensions.width || 600) * 0.25) + 'px)'
+             }">
+             
+          <!-- Hinged Doors -->
+          <ng-container *ngIf="!state.doorStyle || state.doorStyle === 'hinged'">
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-left"
+                 style="transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(-110deg)' : 'rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-right"
+                 style="transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(110deg)' : 'rotateY(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- 3-Door Style -->
+          <ng-container *ngIf="state.doorStyle === '3-door'">
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-left"
+                 style="transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); transition-delay: 0.1s;"
+                 [ngStyle]="{
+                   'width': '33.33%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(-110deg)' : 'rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-left"
+                 style="transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                 [ngStyle]="{
+                   'width': '33.33%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(-110deg)' : 'rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-right"
+                 style="transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); transition-delay: 0.05s;"
+                 [ngStyle]="{
+                   'width': '33.34%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(110deg)' : 'rotateY(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Sliding Door Style -->
+          <ng-container *ngIf="state.doorStyle === 'sliding'">
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
+                 style="transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1);"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'transform': state.isDoorOpen ? 'translateX(95%) translateZ(2px)' : 'translateX(0) translateZ(2px)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
+                 style="transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1); transition-delay: 0.1s;"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'transform': state.isDoorOpen ? 'translateX(-95%) translateZ(-2px)' : 'translateX(0) translateZ(-2px)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Folding / Bi-fold -->
+          <ng-container *ngIf="state.doorStyle === 'folding'">
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-left"
+                 style="transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'scaleX(0.15) rotateY(-45deg)' : 'scaleX(1) rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-right"
+                 style="transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); transition-delay: 0.05s;"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'scaleX(0.15) rotateY(45deg)' : 'scaleX(1) rotateY(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Pivot Doors -->
+          <ng-container *ngIf="state.doorStyle === 'pivot'">
+            <!-- Hinge inset slightly (20% from edge) -->
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
+                 style="transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);"
+                 [style.transform-origin]="'20% 50%'"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(-95deg)' : 'rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
+                 style="transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: 0.1s;"
+                 [style.transform-origin]="'80% 50%'"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateY(95deg)' : 'rotateY(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Flush / Push-to-Open -->
+          <ng-container *ngIf="state.doorStyle === 'push-to-open'">
+            <!-- Adding a subtle inward press then pop outward using a complex bezier -->
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-left"
+                 [style.transition]="state.isDoorOpen ? 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s' : 'transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s'"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'translateZ(30px) rotateY(-110deg)' : 'translateZ(0) rotateY(0deg)'
+                 }"></div>
+            <div class="h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-right"
+                 [style.transition]="state.isDoorOpen ? 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s' : 'transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s'"
+                 [style.transition-delay]="state.isDoorOpen ? '0.1s' : '0s'"
+                 [ngStyle]="{
+                   'width': '50%', 
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'translateZ(30px) rotateY(110deg)' : 'translateZ(0) rotateY(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Lift-Up (Specialty Mechanism) -->
+          <ng-container *ngIf="state.doorStyle === 'lift-up'">
+            <div class="w-full h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-top"
+                 style="transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                 [ngStyle]="{
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateX(100deg)' : 'rotateX(0deg)'
+                 }"></div>
+          </ng-container>
+
+          <!-- Drop-Down (Cabinet Style) -->
+          <ng-container *ngIf="state.doorStyle === 'drop-down'">
+            <div class="w-full h-full border border-black/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] origin-bottom"
+                 style="transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                 [ngStyle]="{
+                   'background-color': state.outerDoorColorHex,
+                   'opacity': state.isDoorOpen ? '0.1' : '1',
+                   'transform': state.isDoorOpen ? 'rotateX(-95deg)' : 'rotateX(0deg)'
+                 }"></div>
+          </ng-container>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,9 +4,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 class="text-xl sm:text-3xl font-bold tracking-tight">KaamKala Configurator</h1>
-        <div class="flex bg-indigo-800 p-1 rounded-lg text-sm">
-          <button (click)="setAppMode('desk')" [ngClass]="{'bg-white text-indigo-800 shadow': activeAppMode === 'desk', 'text-white hover:bg-indigo-700': activeAppMode !== 'desk'}" class="px-4 py-1.5 rounded-md font-semibold transition-colors">Desk Builder</button>
-          <button (click)="setAppMode('bed')" [ngClass]="{'bg-white text-indigo-800 shadow': activeAppMode === 'bed', 'text-white hover:bg-indigo-700': activeAppMode !== 'bed'}" class="px-4 py-1.5 rounded-md font-semibold transition-colors">Bed Builder</button>
+        <div class="flex bg-indigo-800 p-1 rounded-lg text-sm flex-wrap justify-center">
+          <button (click)="setAppMode('desk')" [ngClass]="{'bg-white text-indigo-800 shadow': activeAppMode === 'desk', 'text-white hover:bg-indigo-700': activeAppMode !== 'desk'}" class="px-4 py-1.5 rounded-md font-semibold transition-colors">Desk</button>
+          <button (click)="setAppMode('bed')" [ngClass]="{'bg-white text-indigo-800 shadow': activeAppMode === 'bed', 'text-white hover:bg-indigo-700': activeAppMode !== 'bed'}" class="px-4 py-1.5 rounded-md font-semibold transition-colors">Bed</button>
+          <button (click)="setAppMode('daraz')" [ngClass]="{'bg-white text-indigo-800 shadow': activeAppMode === 'daraz', 'text-white hover:bg-indigo-700': activeAppMode !== 'daraz'}" class="px-4 py-1.5 rounded-md font-semibold transition-colors">Wardrobe</button>
         </div>
       </div>
     </div>
@@ -20,6 +21,7 @@
       <div class="w-full lg:w-1/3 flex-col gap-6" [ngClass]="{'flex': activeMobileTab === 'config', 'hidden lg:flex': activeMobileTab !== 'config'}">
         <app-configurator *ngIf="activeAppMode === 'desk'"></app-configurator>
         <app-bed-configurator *ngIf="activeAppMode === 'bed'"></app-bed-configurator>
+        <app-daraz-configurator *ngIf="activeAppMode === 'daraz'"></app-daraz-configurator>
         
         <app-sidebar *ngIf="activeAppMode === 'desk'"></app-sidebar>
       </div>
@@ -29,6 +31,7 @@
         <div class="sticky top-8">
           <app-canvas *ngIf="activeAppMode === 'desk'"></app-canvas>
           <app-bed-canvas *ngIf="activeAppMode === 'bed'"></app-bed-canvas>
+          <app-daraz-canvas *ngIf="activeAppMode === 'daraz'"></app-daraz-canvas>
         </div>
       </div>
       
