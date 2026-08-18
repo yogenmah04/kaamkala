@@ -1,0 +1,96 @@
+<div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col min-h-[700px]">
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+    <h2 class="text-xl font-semibold text-gray-800">3. True 3D Interactive Canvas</h2>
+    <div class="flex items-center gap-3">
+      <button (click)="toggleMeasurements()" 
+              [ngClass]="showMeasurements ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-500 hover:bg-gray-600'"
+              class="px-3 py-1.5 text-white text-sm font-bold rounded shadow transition-colors active:scale-95">
+        {{ showMeasurements ? 'Hide Measurements' : 'Show Measurements' }}
+      </button>
+      <button (click)="resetToTopDown()" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-bold rounded shadow hover:bg-indigo-700 transition-colors active:scale-95">
+        Target 2D Edit Mode
+      </button>
+      <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
+        💡 Click and drag background to rotate in 3D
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-grow flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border border-gray-300 cursor-grab active:cursor-grabbing select-none" 
+       style="perspective: 2000px;"
+       (mousedown)="startDrag($event)">
+    
+    <!-- Flat 3D-Rotated Canvas (Identical to Desk Builder) -->
+    <div *ngIf="(bedConfig.state$ | async) as state" 
+         class="relative origin-center transition-transform duration-75"
+         [style.transform]="'rotateX(' + rotationX + 'deg) rotateZ(' + rotationZ + 'deg)'"
+         [ngStyle]="{
+           'width.px': (state.dimensions.width || 1600) * 0.25,
+           'height.px': (state.dimensions.length || 2000) * 0.25
+         }"
+         style="box-shadow: -20px 30px 40px rgba(0,0,0,0.3);">
+         
+      <!-- Headboard (Flat projection) -->
+      <div class="absolute -top-[15%] left-0 w-full h-[15%] rounded-t-lg shadow-xl border-b border-black/20"
+           style="transform-origin: bottom; transform: rotateX(-90deg);"
+           [style.background-color]="state.headboardColorHex">
+      </div>
+
+      <!-- Main Bed Surface (Mattress/Frame area) -->
+      <div class="w-full h-full relative shadow-[inset_0_0_30px_rgba(0,0,0,0.1)] rounded-b-lg border border-black/20" 
+           id="bed-boundary"
+           [style.background-color]="state.frameColorHex">
+
+        <!-- Global Bed Measurements Overlay -->
+        <div *ngIf="showMeasurements" class="absolute inset-0 pointer-events-none z-40">
+          <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[10px] font-mono px-2 py-0.5 rounded backdrop-blur-sm">W: {{toInches(state.dimensions.width)}}</div>
+          <div class="absolute top-1/2 -left-20 -translate-y-1/2 bg-black/70 text-white text-[10px] font-mono px-2 py-0.5 rounded backdrop-blur-sm -rotate-90">L: {{toInches(state.dimensions.length)}}</div>
+        </div>
+        
+        <!-- Depth thickness for the frame -->
+        <div class="absolute top-full left-0 w-full rounded-b-sm"
+             [ngStyle]="{
+               'height.px': (state.dimensions.height || 350) * 0.15,
+               'background-color': state.frameColorHex,
+               'transform-origin': 'top',
+               'transform': 'rotateX(-90deg)',
+               'filter': 'brightness(0.6)'
+             }"></div>
+             
+        <div class="absolute top-0 -left-full h-full rounded-l-sm"
+             style="width: 100%; transform-origin: right; transform: rotateY(-90deg); filter: brightness(0.8);"
+             [style.background-color]="state.frameColorHex"></div>
+
+        <!-- Draggable Items -->
+        <div *ngFor="let item of state.items; trackBy: trackByItem"
+             cdkDrag
+             [cdkDragFreeDragPosition]="{x: item.x, y: item.y}"
+             (cdkDragEnded)="onDragEnded($event, item)"
+             cdkDragBoundary="#bed-boundary"
+             class="absolute z-50 flex flex-col items-center justify-center rounded shadow-lg border border-white/50 group"
+             style="resize: both; overflow: hidden;"
+             (mouseup)="onItemResize(item, $event)"
+             [ngStyle]="{
+               'width.px': (item.width || 400) * 0.25,
+               'height.px': (item.height || 400) * 0.25,
+               'background-color': item.colorHex || 'rgba(255,255,255,0.8)'
+             }"
+             [ngClass]="{'rounded-full': item.type === 'hardware' || item.type === 'human'}">
+             
+          <!-- Drag Handle overlay that leaves the bottom-right 25x25px resize handle exposed -->
+          <div cdkDragHandle class="absolute inset-0 z-10 cursor-move" style="clip-path: polygon(0 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) calc(100% - 25px), calc(100% - 25px) 100%, 0 100%);"></div>
+
+          <div *ngIf="item.type === 'human'" class="text-4xl pointer-events-none mb-1 opacity-70 z-0 relative">🛌</div>
+          <span class="text-[10px] font-bold text-black/70 px-1 text-center pointer-events-none drop-shadow-sm z-0 relative">{{item.name}}</span>
+          
+          <div *ngIf="showMeasurements" class="absolute bottom-1 left-1 bg-black/60 text-white text-[8px] font-mono px-1 rounded pointer-events-none z-20">
+            {{toInches(item.width || 400)}} × {{toInches(item.height || 400)}}
+          </div>
+
+          <button (click)="removeItem(item.id)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow hover:bg-red-600 border border-white z-50 cursor-pointer">×</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

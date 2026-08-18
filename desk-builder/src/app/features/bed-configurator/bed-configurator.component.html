@@ -1,0 +1,95 @@
+<div class="bg-white p-6 rounded-lg shadow-md mb-6">
+  <!-- Pre-styled themes -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Bed Themes</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div *ngFor="let theme of preStyledThemes" 
+           (click)="applyTheme(theme)"
+           class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all">
+        <h3 class="font-semibold text-gray-800">{{theme.name}}</h3>
+        <p class="text-xs text-gray-500 mt-1 mb-3">{{theme.description}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between mb-4 border-t border-gray-100 pt-6">
+    <h2 class="text-xl font-semibold text-gray-800">1. Dimensions</h2>
+    <div class="flex items-center">
+      <label class="text-sm text-gray-600 mr-2 font-medium">Unit:</label>
+      <select [ngModel]="selectedUnit" (ngModelChange)="onUnitChange($event)" class="text-sm rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1 pl-2 pr-6">
+        <option *ngFor="let unit of units" [value]="unit">{{unit}}</option>
+      </select>
+    </div>
+  </div>
+
+  <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Length ({{selectedUnit}})</label>
+      <input type="number" formControlName="length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Width ({{selectedUnit}})</label>
+      <input type="number" formControlName="width" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Height ({{selectedUnit}})</label>
+      <input type="number" formControlName="height" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+    </div>
+  </form>
+
+  <h2 class="text-xl font-semibold mt-6 mb-4 text-gray-800">2. Materials & Colors</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Frame Material</label>
+      <select [ngModel]="(bedConfig.state$ | async)?.frameMaterial?.id" (ngModelChange)="updateFrameMaterial($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+        <option *ngFor="let m of materials" [value]="m.id">{{m.name}} (+${{m.pricePerSqM}}/sqm)</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Headboard Material</label>
+      <select [ngModel]="(bedConfig.state$ | async)?.headboardMaterial?.id" (ngModelChange)="updateHeadboardMaterial($event)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+        <option *ngFor="let m of materials" [value]="m.id">{{m.name}} (+${{m.pricePerSqM}}/sqm)</option>
+      </select>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Frame Accent Color</label>
+      <input type="color" [ngModel]="(bedConfig.state$ | async)?.frameColorHex" (ngModelChange)="bedConfig.updateFrameColor($event)" class="h-9 w-full max-w-xs cursor-pointer rounded border border-gray-300 mt-1">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Headboard Accent Color</label>
+      <input type="color" [ngModel]="(bedConfig.state$ | async)?.headboardColorHex" (ngModelChange)="bedConfig.updateHeadboardColor($event)" class="h-9 w-full max-w-xs cursor-pointer rounded border border-gray-300 mt-1">
+    </div>
+  </div>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4 text-gray-800">3. Modular Components</h2>
+  <div class="flex flex-wrap gap-2">
+    <button *ngFor="let comp of availableComponents" 
+            (click)="addComponent(comp)"
+            class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm shadow transition-transform active:scale-95">
+      + Add {{comp.name}}
+    </button>
+  </div>
+
+  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4" *ngIf="(bedConfig.state$ | async)?.items?.length">
+    <h3 class="text-md font-medium text-gray-700 mb-3">Added Components</h3>
+    <ul class="space-y-2">
+      <li *ngFor="let item of (bedConfig.state$ | async)?.items" class="flex justify-between items-center bg-white p-2 border border-gray-300 rounded shadow-sm text-sm">
+        <span class="font-medium text-gray-800">{{item.name}}</span>
+        <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors">Remove</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 4. Export Section -->
+  <div class="mt-8 pt-6 border-t border-gray-200">
+    <button (click)="exportToPdf()" class="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-lg shadow-md text-lg font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Export Manufacturing PDF
+    </button>
+    <p class="text-xs text-gray-500 mt-3 text-center">Generates a blueprint with the complete cut list for your bed configuration.</p>
+  </div>
+</div>
