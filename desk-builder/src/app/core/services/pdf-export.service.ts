@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { DeskConfigState } from './desk-config.service';
 import { BedConfigState } from './bed-config.service';
+import { DarazConfigState } from './daraz-config.service';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Injectable({
   providedIn: 'root'
@@ -182,5 +184,99 @@ export class PdfExportService {
     }
 
     doc.save('Bed_Blueprint.pdf');
+  }
+
+  async exportDarazPdf(state: DarazConfigState) {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // 1. Add Title
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Custom Wardrobe Blueprint & Cut List', 15, 20);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 15, 28);
+
+    // 2. Capture and Embed 3D Viewer Image using html2canvas
+    try {
+      // Find the Daraz 3D canvas container by its class or ID
+      const darazContainer = document.querySelector('#daraz-boundary')?.parentElement?.parentElement as HTMLElement;
+      if (darazContainer) {
+        // Create an image out of the DOM structure
+        const canvas = await html2canvas(darazContainer, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 15, 35, 180, 100);
+        doc.setDrawColor(200);
+        doc.rect(15, 35, 180, 100);
+      }
+    } catch (e) {
+      console.error('Failed to capture Daraz 3D canvas', e);
+      doc.text('[3D Preview Unavailable - Image Capture Failed]', 15, 50);
+    }
+
+    // 3. Master Dimensions Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('1. Master Dimensions (Outer Frame)', 15, 145);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Length (W): ${state.dimensions.length} ${state.selectedUnit || 'mm'}`, 20, 153);
+    doc.text(`Height (H): ${state.dimensions.height} ${state.selectedUnit || 'mm'}`, 20, 160);
+    doc.text(`Depth (D): ${state.dimensions.width} ${state.selectedUnit || 'mm'}`, 20, 167);
+
+    // 4. Materials
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('2. Materials & Colors', 110, 145);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Inner: ${state.innerMaterial?.name}`, 115, 153);
+    doc.text(`Outer Door: ${state.outerDoorMaterial?.name}`, 115, 160);
+
+    // 5. Modular Components
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('3. Internal Modules', 15, 185);
+
+    // Table Header
+    doc.setFontSize(10);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, 190, 180, 8, 'F');
+    doc.text('Item Type / Name', 18, 195);
+    doc.text(`L (${state.selectedUnit || 'mm'})`, 110, 195);
+    doc.text(`B (${state.selectedUnit || 'mm'})`, 135, 195);
+    doc.text(`D (${state.selectedUnit || 'mm'})`, 160, 195);
+
+    doc.setFont('helvetica', 'normal');
+    let y = 205;
+
+    if (state.items && state.items.length > 0) {
+      state.items.forEach((item, index) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+
+        if (item.type !== 'human') {
+          doc.text(`- ${item.name}`, 18, y);
+          doc.text(`${item.width || 0}`, 110, y);
+          doc.text(`${item.height || 0}`, 135, y);
+          doc.text(`${item.itemDepth || state.dimensions.width}`, 160, y);
+          y += 8;
+        }
+      });
+    } else {
+      doc.text('No internal components added.', 18, 205);
+    }
+
+    // Save PDF
+    doc.save('Wardrobe_Blueprint.pdf');
   }
 }

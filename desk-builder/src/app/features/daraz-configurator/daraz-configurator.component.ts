@@ -183,11 +183,10 @@ export class DarazConfiguratorComponent implements OnDestroy {
   }
 
   exportToPdf() {
-    // We will integrate daraz export to pdf export service later, but calling basic export for now
     let currentState;
     this.darazConfig.state$.pipe(takeUntil(this.destroy$)).subscribe(state => currentState = state).unsubscribe();
     if (currentState) {
-      this.pdfExportService.exportPdf(currentState as any); // Type cast for now
+      this.pdfExportService.exportDarazPdf(currentState);
     }
   }
 
