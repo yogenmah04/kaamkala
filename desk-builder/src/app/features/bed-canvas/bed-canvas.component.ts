@@ -14,6 +14,7 @@ import { BedConfigService, BedItem } from '../../core/services/bed-config.servic
 export class BedCanvasComponent {
   rotationX = 65;
   rotationZ = -20;
+  zoomScale = 1;
   showMeasurements = false;
   
   private isDragging = false;
@@ -66,6 +67,21 @@ export class BedCanvasComponent {
   resetToTopDown() {
     this.rotationX = 0;
     this.rotationZ = 0;
+    this.zoomScale = 1;
+  }
+
+  onWheel(event: WheelEvent) {
+    event.preventDefault(); // prevent page scrolling
+    const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
+    this.zoomScale = Math.max(0.2, Math.min(this.zoomScale + zoomDelta, 3));
+  }
+
+  zoomIn() {
+    this.zoomScale = Math.min(this.zoomScale + 0.1, 3);
+  }
+
+  zoomOut() {
+    this.zoomScale = Math.max(this.zoomScale - 0.1, 0.2);
   }
 
   toggleMeasurements() {

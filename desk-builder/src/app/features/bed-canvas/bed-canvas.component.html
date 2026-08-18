@@ -2,6 +2,11 @@
   <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
     <h2 class="text-xl font-semibold text-gray-800">3. True 3D Interactive Canvas</h2>
     <div class="flex items-center gap-3">
+      <div class="flex items-center bg-gray-100 rounded shadow-sm border border-gray-200">
+        <button (click)="zoomOut()" class="px-3 py-1.5 text-gray-700 hover:bg-gray-200 font-bold transition-colors border-r border-gray-200">-</button>
+        <span class="px-3 py-1.5 text-sm font-mono text-gray-600 font-medium">{{ (zoomScale * 100) | number:'1.0-0' }}%</span>
+        <button (click)="zoomIn()" class="px-3 py-1.5 text-gray-700 hover:bg-gray-200 font-bold transition-colors border-l border-gray-200">+</button>
+      </div>
       <button (click)="toggleMeasurements()" 
               [ngClass]="showMeasurements ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-500 hover:bg-gray-600'"
               class="px-3 py-1.5 text-white text-sm font-bold rounded shadow transition-colors active:scale-95">
@@ -10,20 +15,18 @@
       <button (click)="resetToTopDown()" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-bold rounded shadow hover:bg-indigo-700 transition-colors active:scale-95">
         Target 2D Edit Mode
       </button>
-      <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
-        💡 Click and drag background to rotate in 3D
-      </div>
     </div>
   </div>
 
   <div class="flex-grow flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg border border-gray-300 cursor-grab active:cursor-grabbing select-none" 
        style="perspective: 2000px;"
-       (mousedown)="startDrag($event)">
+       (mousedown)="startDrag($event)"
+       (wheel)="onWheel($event)">
     
     <!-- Flat 3D-Rotated Canvas (Identical to Desk Builder) -->
     <div *ngIf="(bedConfig.state$ | async) as state" 
          class="relative origin-center transition-transform duration-75"
-         [style.transform]="'rotateX(' + rotationX + 'deg) rotateZ(' + rotationZ + 'deg)'"
+         [style.transform]="'scale(' + zoomScale + ') rotateX(' + rotationX + 'deg) rotateZ(' + rotationZ + 'deg)'"
          [ngStyle]="{
            'width.px': (state.dimensions.width || 1600) * 0.25,
            'height.px': (state.dimensions.length || 2000) * 0.25
