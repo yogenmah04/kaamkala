@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1787046699273,
+  "timestamp": 1787207174012,
   "index": "/kaamkala/desk-builder/index.html",
   "assetGroups": [
     {
@@ -18,10 +18,10 @@
         "/kaamkala/desk-builder/chunk-JUDX4NPP.js",
         "/kaamkala/desk-builder/favicon.ico",
         "/kaamkala/desk-builder/index.html",
-        "/kaamkala/desk-builder/main-M4ZX5SVM.js",
+        "/kaamkala/desk-builder/main-YM6RX6IU.js",
         "/kaamkala/desk-builder/manifest.webmanifest",
         "/kaamkala/desk-builder/polyfills-FFHMD2TL.js",
-        "/kaamkala/desk-builder/styles-GSFB6IVF.css"
+        "/kaamkala/desk-builder/styles-NGKFKENL.css"
       ],
       "patterns": []
     },
@@ -62,12 +62,12 @@
     "/kaamkala/desk-builder/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
     "/kaamkala/desk-builder/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/kaamkala/desk-builder/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
-    "/kaamkala/desk-builder/index.html": "1f2271c33dd9fcc075eaf35497df926a106f41dc",
-    "/kaamkala/desk-builder/main-M4ZX5SVM.js": "58edff7a71234e91fbc1d6bc2a0567892caf089f",
+    "/kaamkala/desk-builder/index.html": "96c9b3e11f2a19eb90bd2d78a4b30b0e89a10ccb",
+    "/kaamkala/desk-builder/main-YM6RX6IU.js": "57cec5ef98d78c36da0178a69c5b0f536e6d50d7",
     "/kaamkala/desk-builder/manifest.webmanifest": "87e5a95e21136b7ac35dea24efa49a0a416d1844",
     "/kaamkala/desk-builder/monitor.png": "5f260944538c6b91a91e0bb620d9478aeda933d6",
     "/kaamkala/desk-builder/polyfills-FFHMD2TL.js": "f49b49a155bc7d192db62a4c15d0a612b460a667",
-    "/kaamkala/desk-builder/styles-GSFB6IVF.css": "c90f433f00e18fafd0a118d8a0365a8547e7f23a"
+    "/kaamkala/desk-builder/styles-NGKFKENL.css": "ebb1836c0a8aebc1b33c4d4d0df7e4a5ee8c6a16"
   },
   "navigationUrls": [
     {
