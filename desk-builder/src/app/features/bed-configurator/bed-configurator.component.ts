@@ -65,6 +65,7 @@ export class BedConfiguratorComponent implements OnDestroy {
   onUnitChange(newUnit: string) {
     const oldUnit = this.selectedUnit;
     this.selectedUnit = newUnit;
+    this.bedConfig.updateUnit(newUnit);
 
     const currentValues = this.configForm.value;
     const newLength = this.convertBetween(currentValues.length, oldUnit, newUnit);
@@ -147,6 +148,14 @@ export class BedConfiguratorComponent implements OnDestroy {
 
   removeItem(id: string) {
     this.bedConfig.removeItem(id);
+  }
+
+  updateItemDim(item: any, w: number, h: number, d: number) {
+    this.bedConfig.updateItemDimensions(item.id, w, h, d);
+  }
+
+  trackByItem(index: number, item: any) {
+    return item.id;
   }
 
   exportToPdf() {

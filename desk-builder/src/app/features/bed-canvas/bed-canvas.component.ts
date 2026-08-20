@@ -88,8 +88,14 @@ export class BedCanvasComponent {
     this.showMeasurements = !this.showMeasurements;
   }
 
-  toInches(mm: number): string {
-    return (mm / 25.4).toFixed(1) + '"';
+  formatMeasurement(mm: number, unit: string): string {
+    switch (unit) {
+      case 'cm': return (mm / 10).toFixed(1) + ' cm';
+      case 'm': return (mm / 1000).toFixed(2) + ' m';
+      case 'in': return (mm / 25.4).toFixed(1) + '"';
+      case 'ft': return (mm / 304.8).toFixed(2) + ' ft';
+      default: return Math.round(mm) + ' mm';
+    }
   }
 
   onDragEnded(event: CdkDragEnd, item: BedItem) {
@@ -116,5 +122,23 @@ export class BedCanvasComponent {
 
   removeItem(id: string) {
     this.bedConfig.removeItem(id);
+  }
+
+  getUIZTranslate(item: any, state: any, zOffset: number): string {
+    const realDepthMm = item.itemDepth || 200; // Default height for bed items if not specified
+    let baseZ = realDepthMm * 0.25; 
+    
+    // For human and headboard, they might be taller or flat
+    if (item.type === 'human') baseZ = 300 * 0.25;
+    if (item.type === 'hardware') baseZ = 150 * 0.25;
+
+    let transformStr = `translateZ(${baseZ + zOffset}px)`;
+    
+    if (state.isStorageOpen && item.type === 'drawer') {
+        const isLeft = item.x < ((state.dimensions.width || 1600) / 2);
+        transformStr += isLeft ? ' translateX(-80%)' : ' translateX(80%)';
+    }
+
+    return transformStr;
   }
 }

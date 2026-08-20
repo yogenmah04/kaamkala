@@ -35,6 +35,7 @@ export interface BedConfigState {
   headboardColorHex: string;
   isStorageOpen: boolean;
   items: BedItem[];
+  selectedUnit: string;
 }
 
 export const BED_MATERIALS: BedMaterialOption[] = [
@@ -101,7 +102,8 @@ export class BedConfigService {
     frameColorHex: BED_THEMES[0].frameColorHex,
     headboardColorHex: BED_THEMES[0].headboardColorHex,
     isStorageOpen: false,
-    items: BED_THEMES[0].items as any[]
+    items: BED_THEMES[0].items as any[],
+    selectedUnit: 'mm'
   };
 
   private stateSubject = new BehaviorSubject<BedConfigState>(this.initialState);
@@ -114,6 +116,10 @@ export class BedConfigService {
 
   updateDimensions(dimensions: BedDimensions) {
     this.stateSubject.next({ ...this.stateSubject.value, dimensions });
+  }
+
+  updateUnit(unit: string) {
+    this.stateSubject.next({ ...this.stateSubject.value, selectedUnit: unit });
   }
 
   updateFrameMaterial(frameMaterial: BedMaterialOption) {
@@ -149,9 +155,9 @@ export class BedConfigService {
     this.stateSubject.next({ ...this.stateSubject.value, items });
   }
 
-  updateItemDimensions(id: string, width: number, height: number) {
+  updateItemDimensions(id: string, width: number, height: number, itemDepth?: number) {
     const items = this.stateSubject.value.items.map(item =>
-      item.id === id ? { ...item, width, height } : item
+      item.id === id ? { ...item, width, height, itemDepth: itemDepth ?? item.itemDepth } : item
     );
     this.stateSubject.next({ ...this.stateSubject.value, items });
   }

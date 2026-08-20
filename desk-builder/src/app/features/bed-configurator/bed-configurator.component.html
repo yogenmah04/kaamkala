@@ -75,9 +75,22 @@
   <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4" *ngIf="(bedConfig.state$ | async)?.items?.length">
     <h3 class="text-md font-medium text-gray-700 mb-3">Added Components</h3>
     <ul class="space-y-2">
-      <li *ngFor="let item of (bedConfig.state$ | async)?.items" class="flex justify-between items-center bg-white p-2 border border-gray-300 rounded shadow-sm text-sm">
-        <span class="font-medium text-gray-800">{{item.name}}</span>
-        <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors">Remove</button>
+      <li *ngFor="let item of (bedConfig.state$ | async)?.items; trackBy: trackByItem" class="flex flex-col bg-white p-3 border border-gray-300 rounded shadow-sm text-sm gap-2">
+        <div class="flex justify-between items-center">
+          <span class="font-medium text-gray-800">{{item.name}}</span>
+          <button (click)="removeItem(item.id)" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors">Remove</button>
+        </div>
+        <div class="flex gap-4 text-xs items-center text-gray-600 flex-wrap">
+          <label class="flex items-center gap-1">Width: 
+            <input type="number" [ngModel]="item.width || 400" (ngModelChange)="updateItemDim(item, $event, item.height || 400, item.itemDepth || 200)" class="w-16 border rounded p-1">
+          </label>
+          <label class="flex items-center gap-1">Length: 
+            <input type="number" [ngModel]="item.height || 400" (ngModelChange)="updateItemDim(item, item.width || 400, $event, item.itemDepth || 200)" class="w-16 border rounded p-1">
+          </label>
+          <label class="flex items-center gap-1">Depth: 
+            <input type="number" [ngModel]="item.itemDepth || 200" (ngModelChange)="updateItemDim(item, item.width || 400, item.height || 400, $event)" class="w-16 border rounded p-1">
+          </label>
+        </div>
       </li>
     </ul>
   </div>
