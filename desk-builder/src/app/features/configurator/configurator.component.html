@@ -97,16 +97,16 @@
       </div>
       <div class="grid grid-cols-3 gap-2">
         <div>
-          <label class="block text-xs text-gray-600">Length (L) mm:</label>
-          <input type="number" [(ngModel)]="comp.l" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+          <label class="block text-xs text-gray-600">Length (L) {{selectedUnit}}:</label>
+          <input type="number" [ngModel]="getDisplayValue(comp.l)" (ngModelChange)="comp.l = getMmValue($event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
         </div>
         <div>
-          <label class="block text-xs text-gray-600">Height (H) mm:</label>
-          <input type="number" [(ngModel)]="comp.h" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+          <label class="block text-xs text-gray-600">Height (H) {{selectedUnit}}:</label>
+          <input type="number" [ngModel]="getDisplayValue(comp.h)" (ngModelChange)="comp.h = getMmValue($event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
         </div>
         <div>
-          <label class="block text-xs text-gray-600">Breadth (B) mm:</label>
-          <input type="number" [(ngModel)]="comp.b" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+          <label class="block text-xs text-gray-600">Breadth (B) {{selectedUnit}}:</label>
+          <input type="number" [ngModel]="getDisplayValue(comp.b)" (ngModelChange)="comp.b = getMmValue($event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
         </div>
       </div>
     </div>
@@ -125,8 +125,8 @@
       </div>
       <div class="grid grid-cols-3 gap-2">
         <div>
-          <label class="block text-xs text-gray-600">Length (L) mm:</label>
-          <input type="number" [(ngModel)]="comp.l" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
+          <label class="block text-xs text-gray-600">Length (L) {{selectedUnit}}:</label>
+          <input type="number" [ngModel]="getDisplayValue(comp.l)" (ngModelChange)="comp.l = getMmValue($event)" class="w-full p-1 border border-gray-300 rounded text-xs mt-1">
         </div>
       </div>
     </div>

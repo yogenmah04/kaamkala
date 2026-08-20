@@ -125,18 +125,38 @@ export class BedCanvasComponent {
   }
 
   getUIZTranslate(item: any, state: any, zOffset: number): string {
-    const realDepthMm = item.itemDepth || 200; // Default height for bed items if not specified
+    const realDepthMm = item.itemDepth || 200;
     let baseZ = realDepthMm * 0.25; 
     
-    // For human and headboard, they might be taller or flat
     if (item.type === 'human') baseZ = 300 * 0.25;
     if (item.type === 'hardware') baseZ = 150 * 0.25;
+    if (item.type === 'drawer') baseZ = 0; // Drawer is under the bed, top face is at Z=0
 
     let transformStr = `translateZ(${baseZ + zOffset}px)`;
     
     if (state.isStorageOpen && item.type === 'drawer') {
         const isLeft = item.x < ((state.dimensions.width || 1600) / 2);
-        transformStr += isLeft ? ' translateX(-80%)' : ' translateX(80%)';
+        transformStr = (isLeft ? 'translateX(-80%) ' : 'translateX(80%) ') + transformStr;
+    } else {
+        transformStr = 'translateX(0%) ' + transformStr;
+    }
+
+    return transformStr;
+  }
+
+  getItemPhysicalTransform(item: any, state: any): string {
+    let baseZ = 0;
+    if (item.type === 'drawer') {
+      baseZ = -((item.itemDepth || 200) * 0.25);
+    }
+    
+    let transformStr = `translateZ(${baseZ}px)`;
+    
+    if (state.isStorageOpen && item.type === 'drawer') {
+        const isLeft = item.x < ((state.dimensions.width || 1600) / 2);
+        transformStr = (isLeft ? 'translateX(-80%) ' : 'translateX(80%) ') + transformStr;
+    } else {
+        transformStr = 'translateX(0%) ' + transformStr;
     }
 
     return transformStr;

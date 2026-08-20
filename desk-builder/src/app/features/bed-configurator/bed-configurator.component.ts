@@ -150,8 +150,15 @@ export class BedConfiguratorComponent implements OnDestroy {
     this.bedConfig.removeItem(id);
   }
 
-  updateItemDim(item: any, w: number, h: number, d: number) {
-    this.bedConfig.updateItemDimensions(item.id, w, h, d);
+  updateItemDim(item: any, wDisplay: number, hDisplay: number, dDisplay: number) {
+    const wMm = this.convertBetween(wDisplay, this.selectedUnit, 'mm');
+    const hMm = this.convertBetween(hDisplay, this.selectedUnit, 'mm');
+    const dMm = this.convertBetween(dDisplay, this.selectedUnit, 'mm');
+    this.bedConfig.updateItemDimensions(item.id, wMm, hMm, dMm);
+  }
+
+  getDisplayValue(valMm: number): number {
+    return Number(this.convertBetween(valMm, 'mm', this.selectedUnit).toFixed(2));
   }
 
   trackByItem(index: number, item: any) {

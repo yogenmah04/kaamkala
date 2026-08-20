@@ -245,6 +245,14 @@ export class ConfiguratorComponent implements OnInit, OnDestroy {
     return items;
   }
 
+  getDisplayValue(valMm: number): number {
+    return Number(this.convertBetween(valMm, 'mm', this.selectedUnit).toFixed(2));
+  }
+
+  getMmValue(displayVal: number): number {
+    return this.convertToMm(displayVal, this.selectedUnit);
+  }
+
   exportToPdf() {
     // Get latest state synchronously
     let currentState;

@@ -82,13 +82,13 @@
         </div>
         <div class="flex gap-4 text-xs items-center text-gray-600 flex-wrap">
           <label class="flex items-center gap-1">Width: 
-            <input type="number" [ngModel]="item.width || 400" (ngModelChange)="updateItemDim(item, $event, item.height || 400, item.itemDepth || 200)" class="w-16 border rounded p-1">
+            <input type="number" [ngModel]="getDisplayValue(item.width || 400)" (ngModelChange)="updateItemDim(item, $event, getDisplayValue(item.height || 400), getDisplayValue(item.itemDepth || 200))" class="w-16 border rounded p-1">
           </label>
           <label class="flex items-center gap-1">Length: 
-            <input type="number" [ngModel]="item.height || 400" (ngModelChange)="updateItemDim(item, item.width || 400, $event, item.itemDepth || 200)" class="w-16 border rounded p-1">
+            <input type="number" [ngModel]="getDisplayValue(item.height || 400)" (ngModelChange)="updateItemDim(item, getDisplayValue(item.width || 400), $event, getDisplayValue(item.itemDepth || 200))" class="w-16 border rounded p-1">
           </label>
           <label class="flex items-center gap-1">Depth: 
-            <input type="number" [ngModel]="item.itemDepth || 200" (ngModelChange)="updateItemDim(item, item.width || 400, item.height || 400, $event)" class="w-16 border rounded p-1">
+            <input type="number" [ngModel]="getDisplayValue(item.itemDepth || 200)" (ngModelChange)="updateItemDim(item, getDisplayValue(item.width || 400), getDisplayValue(item.height || 400), $event)" class="w-16 border rounded p-1">
           </label>
         </div>
       </li>
